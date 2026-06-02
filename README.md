@@ -4,7 +4,7 @@
 
 ## 🔗 專案展示連結 (Live Demo)
 * **🌐 網頁應用程式 (MVP)：** [點擊此處前往體驗 Eternal Green App](./未命名.html)
-* **📊 期末簡報 (PPT/PDF)：** [點擊此處查看完整提案簡報](./Eternal Green 期末完整提案(2).pdf)
+* **📊 期末簡報 (PPT/PDF)：** [點擊此處查看完整提案簡報](./presentation.pdf)
 
 ---
 

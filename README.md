@@ -3,8 +3,8 @@
 > 💡 **SBIR 小型企業創新研發計畫 - 期末提案** > AI 演算法驅動的生命永續與數位追思解決方案
 
 ## 🔗 專案展示連結 (Live Demo)
-* **🌐 網頁應用程式 (MVP)：** [點擊此處前往體驗 Eternal Green App](https://a0980405956.github.io/Eternal-Green-SBIR/)
-* **📊 期末簡報 (PPT/PDF)：** [點擊此處查看完整提案簡報](./Eternal_Green_Presentation.pdf) *(請見下方說明更換連結)*
+* **🌐 網頁應用程式 (MVP)：** [點擊此處前往體驗 Eternal Green App](./未命名.html)
+* **📊 期末簡報 (PPT/PDF)：** [點擊此處查看完整提案簡報](./Eternal Green 期末完整提案.pdf)
 
 ---
 

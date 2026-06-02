@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Green | 智慧樹葬與命理追思平台 (Demo版)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #15803d; /* 森林綠 */
+            --bg-color: #f8fafc;
+            --accent: #b45309; /* 溫暖橘棕色 */
+            --text-dark: #1e293b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+        body { background-color: var(--bg-color); color: var(--text-dark); }
+
+        /* 頂部導航 */
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #15803d);
+            color: white; padding: 1.5rem; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: sticky; top: 0; z-index: 100;
+        }
+        header h1 { font-size: 2rem; letter-spacing: 2px; margin-bottom: 0.5rem; }
+        
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+
+        .card {
+            background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card h2 { color: #1e3a8a; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.8rem; }
+
+        /* 表單元件 */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #475569; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: 0.3s;
+        }
+        .form-group input:focus { border-color: var(--primary); outline: none; }
+
+        button {
+            background-color: var(--primary); color: white; border: none; padding: 1rem;
+            border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; width: 100%;
+            transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        button:hover { background-color: #166534; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3); }
+
+        /* 載入動畫 (Spinner) */
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 運算結果區塊 */
+        .result-box {
+            background-color: #f0fdf4; padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem;
+            border-left: 5px solid var(--primary); display: none; animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* AR 雷達科幻介面 */
+        .ar-viewfinder {
+            height: 280px; background: #0f172a; border-radius: 12px; margin-bottom: 1.5rem;
+            position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 3px solid #334155;
+        }
+        /* 掃描雷射線 */
+        .scanner-line {
+            position: absolute; width: 100%; height: 3px; background: #22c55e;
+            box-shadow: 0 0 15px #22c55e, 0 0 30px #22c55e;
+            animation: scanWave 2.5s infinite linear; display: none;
+        }
+        @keyframes scanWave { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        /* 十字準星 */
+        .crosshair {
+            width: 60px; height: 60px; border: 2px solid rgba(255,255,255,0.3); position: absolute;
+        }
+        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,0.5); }
+        .crosshair::before { top: 50%; left: -10px; right: -10px; height: 1px; }
+        .crosshair::after { left: 50%; top: -10px; bottom: -10px; width: 1px; }
+
+        .ar-text { color: #22c55e; font-family: monospace; font-size: 1.2rem; z-index: 10; margin-top: 80px; text-shadow: 0 0 5px #22c55e; }
+
+        /* 數位紀念碑對話 UI */
+        .memorial-wall {
+            height: 250px; overflow-y: auto; background: #f1f5f9; padding: 1.5rem;
+            border-radius: 12px; margin-bottom: 1rem; border: 1px solid #cbd5e1;
+        }
+        .message { background: white; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); max-width: 85%; }
+        .msg-user { margin-left: auto; background: #1e3a8a; color: white; border-bottom-right-radius: 2px; }
+        .msg-ai { margin-right: auto; background: white; border-bottom-left-radius: 2px; border-left: 4px solid var(--primary); }
+        
+        /* 打字指示器 */
+        .typing-indicator { display: none; padding: 1rem; background: white; border-radius: 12px; max-width: 80px; margin-bottom: 1rem; border-left: 4px solid var(--primary); }
+        .typing-indicator span { display: inline-block; width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-leaf"></i> Eternal Green</h1>
+        <p>AI 演算法驅動的生命永續與數位追思解決方案</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="card">
+            <h2><i class="fa-solid fa-compass" style="color: var(--accent);"></i> AI 命理五行擇位演算</h2>
+            <p style="margin-bottom: 1.5rem; color: #64748b;">匯入生辰八字，系統將自動比對園區 GIS 環境參數與五行屬性。</p>
+            
+            <div class="form-group">
+                <label>逝者姓名</label>
+                <input type="text" id="birthName" placeholder="例如：王大明">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>出生日期 (西曆)</label>
+                    <input type="date" id="birthDate">
+                </div>
+                <div class="form-group">
+                    <label>出生時辰</label>
+                    <select id="birthTime">
+                        <option value="子">子時 (23:00 - 01:00)</option>
+                        <option value="丑">丑時 (01:00 - 03:00)</option>
+                        <option value="寅">寅時 (03:00 - 05:00)</option>
+                        <option value="卯">卯時 (05:00 - 07:00)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="btnCalculate" onclick="calculateBazi()">
+                <div class="loader" id="baziLoader"></div>
+                <span id="btnText">啟動 AI 演算法分析</span>
+            </button>
+
+            <div id="baziResult" class="result-box">
+                <h3 style="color: var(--primary); margin-bottom: 10px;"><i class="fa-solid fa-check-circle"></i> 運算完成</h3>
+                <p id="baziAnalysis" style="margin-bottom: 8px;"></p>
+                <p id="zoneRecommendation" style="font-size: 1.2rem; font-weight: bold; color: var(--accent); background: white; padding: 10px; border-radius: 6px;"></p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-vr-cardboard" style="color: #3b82f6;"></i> LBS 實景空間導航</h2>
+            <p style="margin-bottom: 1.5rem; color: #64748b;">串接手機 GPS 與陀螺儀，進行環境掃描與 AR 虛擬錨點定位。</p>
+            
+            <div class="ar-viewfinder" id="arView">
+                <div class="crosshair"></div>
+                <div class="scanner-line" id="scannerLine"></div>
+                <div class="ar-text" id="arStatus">等待啟動掃描...</div>
+            </div>
+            <button onclick="startNavigation()" style="background-color: #1e3a8a;"><i class="fa-solid fa-camera"></i> 啟動相機與 AR 掃描</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-cloud" style="color: #0ea5e9;"></i> AIGC 數位紀念館</h2>
+            <p style="margin-bottom: 1.5rem; color: #64748b;">結合生成式 AI 模型，將思念轉化為永續的數位互動。</p>
+            
+            <div class="memorial-wall" id="memorialWall">
+                <div class="message msg-ai"><i class="fa-solid fa-robot" style="color: var(--primary);"></i> <strong>系統公告：</strong> 已成功連線至楠木區 A-102 數位紀念碑。您可以開始留言。</div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span><span></span><span></span>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="userMessage" placeholder="寫下您想對摯愛說的話..." style="flex: 1; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                <button onclick="sendMessage()" style="background-color: var(--accent); width: 120px;"><i class="fa-solid fa-paper-plane"></i> 發送</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 模組一：AI 命理擇位 (含假載入動畫)
+        function calculateBazi() {
+            const name = document.getElementById('birthName').value || '王先生/女士';
+            const date = document.getElementById('birthDate').value;
+            if(!date) { alert('請輸入出生日期'); return; }
+
+            // UI 狀態切換：顯示載入中
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('baziLoader');
+            const resultBox = document.getElementById('baziResult');
+            
+            btnText.innerText = "資料庫匹配中...";
+            loader.style.display = "block";
+            resultBox.style.display = "none";
+
+            // 模擬伺服器運算延遲 1.5 秒
+            setTimeout(() => {
+                const elements = ['金 (注重方位與磁場淨化)', '木 (象徵生生不息、繁衍)', '水 (象徵平靜與包容)', '火 (象徵溫暖與光明)', '土 (象徵穩重與庇蔭)'];
+                const zones = ['西區 - 銀杏景觀區', '東區 - 台灣楠木林', '北區 - 水岸松樹林', '南區 - 櫻花步道區', '中區 - 百年樟樹區'];
+                const randomIndex = Math.floor(Math.random() * elements.length);
+
+                document.getElementById('baziAnalysis').innerHTML = `系統分析 ${name} 之干支命盤，其五行喜用神為：<strong>${elements[randomIndex]}</strong>。`;
+                document.getElementById('zoneRecommendation').innerHTML = `<i class="fa-solid fa-location-dot"></i> 最佳推薦安葬點：${zones[randomIndex]} (環境契合度 98%)`;
+                
+                loader.style.display = "none";
+                btnText.innerText = "重新運算分析";
+                resultBox.style.display = "block";
+            }, 1500);
+        }
+
+        // 模組二：AR 導航 (科幻掃描特效)
+        function startNavigation() {
+            const scanner = document.getElementById('scannerLine');
+            const status = document.getElementById('arStatus');
+            const arView = document.getElementById('arView');
+            
+            scanner.style.display = 'block';
+            status.innerText = "GPS 定位中...";
+            status.style.color = "#eab308"; // 黃色
+
+            let countdown = 3;
+            const interval = setInterval(() => {
+                if(countdown > 0) {
+                    status.innerText = `正在載入環境圖資... (${countdown})`;
+                    countdown--;
+                } else {
+                    clearInterval(interval);
+                    status.innerText = "🎯 已鎖定目標！距離：12.5 公尺";
+                    status.style.color = "#22c55e"; // 綠色
+                    arView.style.border = "3px solid #22c55e"; // 框線變綠
+                }
+            }, 800);
+        }
+
+        // 模組三：AIGC 互動 (打字特效)
+        function sendMessage() {
+            const input = document.getElementById('userMessage');
+            const messageText = input.value.trim();
+            const wall = document.getElementById('memorialWall');
+            const indicator = document.getElementById('typingIndicator');
+
+            if(messageText === '') return;
+
+            // 顯示家屬留言
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message msg-user';
+            userMsg.innerHTML = messageText;
+            wall.appendChild(userMsg);
+            input.value = ''; 
+            wall.scrollTop = wall.scrollHeight;
+
+            // 顯示 AI 打字動畫
+            indicator.style.display = 'block';
+            
+            // 模擬 AI 生成時間 2.5 秒
+            setTimeout(() => {
+                indicator.style.display = 'none';
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message msg-ai';
+                aiMsg.innerHTML = `<i class="fa-solid fa-leaf" style="color: var(--primary);"></i> <strong>永續回音：</strong> 我已將您的思念化為養分。我在這裡看著陽光穿透樹葉，一切安好，請不用掛心。`;
+                wall.appendChild(aiMsg);
+                wall.scrollTop = wall.scrollHeight;
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
